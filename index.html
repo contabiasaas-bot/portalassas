@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><title>ContaPlena</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Fraunces:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f1e8;--sf:#fffdf8;--ink:#26281f;--mut:#76735f;--ln:#e3ddcc;--gr:#1c3b2d;--or:#d9901c;--rd:#b3402a;--ok:#2f7d4f}
+@media(prefers-color-scheme:dark){:root{--bg:#141810;--sf:#1d2216;--ink:#ece8da;--mut:#9c9885;--ln:#333a27;--gr:#0e1f16;--or:#e8a53a;--rd:#e0735c;--ok:#5fb383}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 Figtree,system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0}.top{background:var(--gr);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center}
+.pg{max-width:1100px;margin:0 auto;padding:24px}.mt{color:var(--mut);font-size:13px}
+.b{background:var(--gr);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}.b.o{background:none;color:var(--ink);border:1px solid var(--ln)}.b.r{background:var(--rd)}.b.s{padding:4px 9px;font-size:12.5px}
+input,select{font:inherit;padding:9px 11px;border:1px solid var(--ln);border-radius:8px;background:var(--sf);color:var(--ink)}
+label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mut)}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:10px 0}
+.c{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:16px;margin:12px 0}
+.tabs{display:flex;gap:6px;border-bottom:1px solid var(--ln);margin:14px 0}.tabs button{background:none;border:0;padding:12px;font:inherit;color:var(--mut);border-bottom:2px solid transparent;cursor:pointer}.tabs .on{color:var(--ink);font-weight:600;border-color:var(--or)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}th{text-align:left;color:var(--mut);font-weight:500;padding:8px;border-bottom:1px solid var(--ln)}td{padding:8px;border-bottom:1px solid var(--ln)}.n{text-align:right;white-space:nowrap}
+.al{padding:10px 14px;border-radius:10px;margin:8px 0;background:color-mix(in srgb,var(--or) 16%,transparent)}.al.er{background:color-mix(in srgb,var(--rd) 15%,transparent)}.al.ok{background:color-mix(in srgb,var(--ok) 15%,transparent)}
+.lk{color:var(--gr);font-weight:600;cursor:pointer;text-decoration:underline}@media(prefers-color-scheme:dark){.lk{color:var(--or)}}
+.box{max-width:380px;margin:12vh auto;display:flex;flex-direction:column;gap:12px;padding:0 20px}
+</style></head><body><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL='COLE_AQUI_A_URL_DO_PROJETO',SUPABASE_ANON_KEY='COLE_AQUI_A_CHAVE_ANON';
+const SB=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let U=null,P=null,V={tab:'Lançamentos',rt:'DRE',acc:'1.1.02',from:new Date().getFullYear()+'-01-01',to:new Date().toISOString().slice(0,10)};
+const $=s=>document.querySelector(s),g=i=>(document.getElementById(i)?.value||'').trim();
+const E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const F=v=>(+v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),fd=d=>d?d.split('-').reverse().join('/'):'',dg=c=>String(c).replace(/\D/g,'');
+const pv=s=>parseFloat(String(s).replace(/\./g,'').replace(',','.'))||0;
+const fl=(i,l,v='',w=160,t='text')=>`<label>${l}<input id=${i} type=${t} value="${E(v)}" style="width:${w}px"></label>`;
+const tbl=(h,r)=>`<div style="overflow-x:auto"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(c=>`<td${/^-?R\$/.test(c)?' class=n':''}>${c}</td>`).join('')}</tr>`).join('')||`<tr><td colspan=${h.length} class=mt>Nada por aqui ainda.</td></tr>`}</table></div>`;
+const err=e=>alert(e?.message||e||'Erro');
+function okC(c){c=dg(c);if(c.length!=14||/^(\d)\1+$/.test(c))return false;const f=n=>{let s=0,p=n-7;for(let i=0;i<n;i++){s+=c[i]*p--;if(p<2)p=9}const r=s%11;return r<2?0:11-r};return f(12)==c[12]&&f(13)==c[13]}
+async function boot(){const{data:{session}}=await SB.auth.getSession();U=session?.user||null;P=null;
+ if(U&&U.app_metadata?.role!='platform_admin'){const{data}=await SB.from('profiles').select('*,offices(name,active)').eq('id',U.id).maybeSingle();P=data}R()}
+SB.auth.onAuthStateChange((ev)=>{if(ev=='PASSWORD_RECOVERY')V.rec=1;setTimeout(boot,0)});
+const top=t=>`<div class="top"><b style="font:600 20px Fraunces,serif">ContaPlena</b><span>${E(t)} <button class="b o s" style="color:#fff;border-color:#fff5" onclick="SB.auth.signOut()">Sair</button></span></div>`;
+async function R(){$('#app').innerHTML=await view()}
+async function view(){
+ if(V.rec)return`<div class="box"><h2>Nova senha</h2>${fl('np','Nova senha (mín. 8)','',300,'password')}<button class="b" onclick="setPw()">Salvar senha</button></div>`;
+ if(!U)return`<div class="box"><h2>Entrar</h2>${fl('em','E-mail','',300,'email')}${fl('pw','Senha','',300,'password')}<button class="b" onclick="login()">Entrar</button><a class="lk" onclick="forgot()">Esqueci a senha</a></div>`;
+ if(U.app_metadata?.role=='platform_admin')return top('Administrador')+await admin();
+ if(!P||!P.offices?.active)return top('')+`<div class="pg"><div class="al er">Seu acesso está suspenso ou sem escritório vinculado. Fale com o administrador.</div></div>`;
+ return top(P.offices.name)+`<div class="pg">${V.cid?await cview():await cli()}</div>`}
+async function login(){const{error}=await SB.auth.signInWithPassword({email:g('em'),password:document.getElementById('pw').value});if(error)err('E-mail ou senha incorretos.')}
+async function forgot(){const e=g('em');if(!e)return alert('Digite seu e-mail acima.');const{error}=await SB.auth.resetPasswordForEmail(e,{redirectTo:location.origin});error?err(error):alert('Se o e-mail existir, você receberá o link de redefinição.')}
+async function setPw(){const{error}=await SB.auth.updateUser({password:document.getElementById('np').value});if(error)return err(error);V.rec=0;boot()}
+/* ADMIN */
+async function admin(){const{data:o}=await SB.from('offices').select('*').order('created_at',{ascending:false});
+ return`<div class="pg"><h1>Escritórios</h1><p class="mt">Cadastre quem comprou e libere o acesso com e-mail e senha.</p><div class="c"><div class="row">${fl('an','Nome do escritório','',220)}${fl('ae','E-mail de acesso','',220,'email')}${fl('ap','Senha inicial (mín. 8)','',170,'text')}<button class="b" onclick="newOff()">Liberar acesso</button></div></div>`+tbl(['Escritório','Situação','Criado em',''],(o||[]).map(x=>[E(x.name),x.active?'Ativo':'Suspenso',fd(x.created_at.slice(0,10)),`<button class="b o s" onclick="togOff('${x.id}',${!x.active})">${x.active?'Suspender':'Reativar'}</button>`]))+'</div>'}
+async function newOff(){const{data,error}=await SB.functions.invoke('provision',{body:{action:'office',name:g('an'),email:g('ae'),password:g('ap')}});if(error||data?.error)return err(data?.error||error);R()}
+async function togOff(id,a){const{error}=await SB.from('offices').update({active:a}).eq('id',id);if(error)return err(error);R()}
+/* CLIENTES */
+async function cli(){const{data:c}=await SB.from('clients').select('*').order('name');
+ return`<h1>Clientes</h1>`+tbl(['Cliente','CNPJ','Tipo','Regime',''],(c||[]).map(x=>[`<a class=lk onclick="V.cid='${x.id}';V.cn='${E(x.name)}';R()">${E(x.name)}</a>`,x.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'),E(x.kind),E(x.regime),`<button class="b r s" onclick="rmC('${x.id}')">Remover</button>`]))+`<div class="c"><h3>Adicionar cliente</h3><div class="row">${fl('cc','CNPJ','',160)}${fl('cn','Razão social','',230)}${fl('ce','E-mail','',200)}<label>Tipo<select id=ck><option>LTDA</option><option>MEI</option><option>SLU</option><option>S/A</option></select></label><label>Regime<select id=cr><option>Simples Nacional</option><option>MEI</option><option>Lucro Presumido</option><option>Lucro Real</option></select></label><button class="b" onclick="addC()">Cadastrar</button></div></div>`}
+async function addC(){const d=dg(g('cc'));if(!okC(d))return err('CNPJ inválido.');if(!g('cn'))return err('Informe a razão social.');const{error}=await SB.from('clients').insert({office_id:P.office_id,cnpj:d,name:g('cn'),email:g('ce'),kind:g('ck'),regime:g('cr')});if(error)return err(error.code=='23505'?'Cliente já cadastrado.':error);R()}
+async function rmC(id){if(!confirm('Remover cliente e todos os dados?'))return;const{error}=await SB.from('clients').delete().eq('id',id);if(error)return err(error);R()}
+/* FICHA */
+async function cview(){return`<div class="row" style="justify-content:space-between"><h1>${E(V.cn)}</h1><button class="b o" onclick="V.cid=null;R()">Voltar</button></div><div class="tabs">${['Lançamentos','Relatórios','Auditoria'].map(t=>`<button class="${t==V.tab?'on':''}" onclick="V.tab='${t}';R()">${t}</button>`).join('')}</div>`+(V.tab=='Lançamentos'?await lan():V.tab=='Relatórios'?await rel():await aud())}
+async function lan(){const[{data:a},{data:e}]=await Promise.all([SB.from('accounts').select('code,name').eq('client_id',V.cid).order('code'),SB.from('entries').select('*').eq('client_id',V.cid).order('date',{ascending:false}).limit(200)]);V.ac=a||[];const nm=k=>(V.ac.find(x=>x.code==k)||{}).name||'',o=s=>V.ac.map(x=>`<option value="${x.code}"${x.code==s?' selected':''}>${x.code} ${E(x.name)}</option>`).join('');
+ return`<div class="c"><div class="row">${fl('ld','Data',new Date().toISOString().slice(0,10),140,'date')}${fl('lh','Histórico','',200)}<label>Débito<select id=lD>${o('1.1.02')}</select></label><label>Crédito<select id=lC>${o('4.1.01')}</select></label>${fl('lv','Valor (R$)','',110)}<button class="b" onclick="addL()">Lançar</button></div></div>`+tbl(['Data','Histórico','Débito','Crédito','Valor',''],(e||[]).map(x=>[fd(x.date),E(x.memo),x.debit+' '+E(nm(x.debit)),x.credit+' '+E(nm(x.credit)),F(x.amount),`<button class="b r s" onclick="rmL('${x.id}')">Excluir</button>`]))}
+async function addL(){const v=pv(g('lv'));if(!v)return err('Informe o valor.');const{error}=await SB.from('entries').insert({client_id:V.cid,office_id:P.office_id,date:g('ld'),memo:g('lh')||'Lançamento',debit:g('lD'),credit:g('lC'),amount:v});if(error)return err(error);R()}
+async function rmL(id){const{error}=await SB.from('entries').delete().eq('id',id);if(error)return err(error);R()}
+async function rel(){const L=['DRE','Balancete','Balanço patrimonial','Razonete','Caixa'],a={p_client:V.cid},p={...a,p_from:V.from,p_to:V.to};let b,r;
+ if(V.rt=='DRE'){({data:r}=await SB.rpc('dre',p));b=tbl(['Grupo','Conta','Valor'],(r||[]).map(x=>[x.grp,E(x.code+' '+x.name),F(x.amount)]))}
+ else if(V.rt=='Balancete'){({data:r}=await SB.rpc('balancete',p));const d=(r||[]).reduce((t,x)=>t+ +x.debits,0),k=(r||[]).reduce((t,x)=>t+ +x.credits,0);b=tbl(['Código','Conta','Débitos','Créditos','Saldo (D−C)'],[...(r||[]).filter(x=>+x.debits||+x.credits).map(x=>[x.code,E(x.name),F(x.debits),F(x.credits),F(x.balance)]),['','<b>Totais</b>',F(d),F(k),'']])+`<div class="al ${Math.abs(d-k)<.01?'ok':'er'}">${Math.abs(d-k)<.01?'Débitos e créditos fecham.':'Débitos e créditos não fecham.'}</div>`}
+ else if(V.rt=='Balanço patrimonial'){({data:r}=await SB.rpc('balanco',{...a,p_to:V.to}));r=r||[];const s=k=>r.filter(x=>x.grp==k).reduce((t,x)=>t+ +x.amount,0),at=s('ativo'),pp=s('passivo')+s('pl');b=tbl(['Grupo','Conta','Valor'],[...r.map(x=>[x.grp,E(x.code+' '+x.name),F(x.amount)]),['<b>Ativo</b>','',F(at)],['<b>Passivo + PL</b>','',F(pp)]])+`<div class="al ${Math.abs(at-pp)<.01?'ok':'er'}">${Math.abs(at-pp)<.01?'Ativo = Passivo + PL.':'Balanço não fecha.'}</div>`}
+ else if(V.rt=='Razonete'){const{data:ac}=await SB.from('accounts').select('code,name').eq('client_id',V.cid).order('code');({data:r}=await SB.rpc('razonete',{...p,p_code:V.acc}));b=`<div class="row"><label>Conta<select onchange="V.acc=this.value;R()">${(ac||[]).map(x=>`<option value="${x.code}"${x.code==V.acc?' selected':''}>${x.code} ${E(x.name)}</option>`).join('')}</select></label></div>`+tbl(['Data','Histórico','Lado','Valor'],(r||[]).map(x=>[fd(x.date),E(x.memo),x.side=='D'?'Débito':'Crédito',F(x.amount)]))}
+ else{({data:r}=await SB.rpc('caixa',p));b=tbl(['Data','Histórico','Entradas','Saídas','Saldo'],(r||[]).map(x=>[fd(x.date),E(x.memo),F(x.entrada),F(x.saida),F(x.saldo)]))}
+ return`<div class="row">${L.map(x=>`<button class="b ${x==V.rt?'':'o'}" onclick="V.rt='${x}';R()">${x}</button>`).join('')}${fl('rf','De',V.from,140,'date')}${fl('rt2','Até',V.to,140,'date')}<button class="b o" onclick="V.from=g('rf');V.to=g('rt2');R()">Aplicar período</button></div>`+b}
+async function aud(){const{data:r}=await SB.rpc('auditoria',{p_client:V.cid});return(r||[]).map(x=>`<div class="al ${x.nivel=='erro'?'er':''}">${E(x.mensagem)}</div>`).join('')||'<div class="al ok">Nenhum problema encontrado.</div>'}
+boot();
+</script></body></html>
