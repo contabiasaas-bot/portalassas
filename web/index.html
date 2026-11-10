@@ -34,12 +34,12 @@ function okC(c){c=dg(c);if(c.length!=14||/^(\d)\1+$/.test(c))return false;const 
 async function boot(){const{data:{session}}=await SB.auth.getSession();U=session?.user||null;P=null;
  if(U&&U.app_metadata?.role!='platform_admin'){const{data}=await SB.from('profiles').select('*,offices(name,active)').eq('id',U.id).maybeSingle();P=data}R()}
 SB.auth.onAuthStateChange((ev)=>{if(ev=='PASSWORD_RECOVERY')V.rec=1;setTimeout(boot,0)});
-const =t=topbar>`<div class="top"><b style="font:600 20px Fraunces,serif">ContaPlena</b><span>${E(t)} <button class="b o s" style="color:#fff;border-color:#fff5" onclick="SB.auth.signOut()">Sair</button></span></div>`;
+const topbar=t=>`<div class="top"><b style="font:600 20px Fraunces,serif">ContaPlena</b><span>${E(t)} <button class="b o s" style="color:#fff;border-color:#fff5" onclick="SB.auth.signOut()">Sair</button></span></div>`;
 async function R(){$('#app').innerHTML=await view()}
 async function view(){
  if(V.rec)return`<div class="box"><h2>Nova senha</h2>${fl('np','Nova senha (mín. 8)','',300,'password')}<button class="b" onclick="setPw()">Salvar senha</button></div>`;
  if(!U)return`<div class="box"><h2>Entrar</h2>${fl('em','E-mail','',300,'email')}${fl('pw','Senha','',300,'password')}<button class="b" onclick="login()">Entrar</button><a class="lk" onclick="forgot()">Esqueci a senha</a></div>`;
- if(U.app_metadata?.role=='platform_admin')return ('Administrador')+await admin();
+ if(U.app_metadata?.role=='platform_admin')return topbar ('Administrador')+await admin();
  if(!P||!P.offices?.active)return topbar('')+`<div class="pg"><div class="al er">Seu acesso está suspenso ou sem escritório vinculado. Fale com o administrador.</div></div>`;
  return topbar(P.offices.name)+`<div class="pg">${V.cid?await cview():await cli()}</div>`}
 async function login(){const{error}=await SB.auth.signInWithPassword({email:g('em'),password:document.getElementById('pw').value});if(error)err('E-mail ou senha incorretos.')}
